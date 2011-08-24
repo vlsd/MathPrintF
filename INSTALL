@@ -4,3 +4,14 @@ To use it, simply do <<MathPrintF` before calling the printf[] functions.
 Alternatively add to ~/Library/Autoload/
 The package will be autoloaded and you can use printf[] functions without any
 additional code.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+EDIT
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+I did not have a ~/Library/Autoload or ~/Library/Applications on my Linux 
+install.  To install I soft linked the directory using the following command:
+
+    sudo ln -s "PATH_TO_DIRECTORY_CONTAINING_init.m" /usr/local/Wolfram/Mathematica/8.0/AddOns/Packages/MathPrintF
+    
+Also noticed that the directory name and the package name in init.m must match.
+
