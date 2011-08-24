@@ -4,3 +4,7 @@ To use it, simply do <<MathPrintF` before calling the printf[] functions.
 Alternatively add to ~/Library/Autoload/
 The package will be autoloaded and you can use printf[] functions without any
 additional code.
+
+The above only works on OS-X. You'll have to figure out where the relevant
+directories are on your system. A good place to start is to look at the $Path
+variable in Mathematica.
