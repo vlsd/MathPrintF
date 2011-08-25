@@ -88,7 +88,7 @@ sprintf[string_,arguments___]:=Module[{out, i, var, fstrings, fstring, vars,left
 			out = StringReplace[out, fstring->signpart<>intpart,1]
 		],
 		"f", (* float format *)
-		Module[{digits, offset, sign, decimals, intpart, signpart, pad},
+		Module[{digits, offset, decimals, intpart, signpart, pad},
 			{digits, offset} = RealDigits[var];
 			digits = StringJoin@@ToString/@digits;
 			
