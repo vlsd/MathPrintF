@@ -2,16 +2,12 @@
 
 (* work in progress: fprintf functionality for Mathematica *)
 (* author: Vlad Seghete, vlad.seghete@gmail.com *)
-(* modified: Aug 24, 2011 *)
-(* bugs:
-	1. an unnnecessarHy space is introduced in front of the number -- FIXED
-	2. %.x and % x. syntax fails -- FIXED
-	3. how should %0.x or % x .0 be interpreted? make it more consistent with the C specs
-	4. % d doesn't work properly. it needs defaults. -- FIXED
+(* modified: Aug 25, 2011 *)
 
+
+
+(*
 TODO:
-	add '+' functionality to % d and % f
-	rewrite % f with code from % d
 	implement % e and % E
 	implement % x
 	implement % c (?) 
@@ -36,9 +32,10 @@ sprintf[string_,arguments___]:=Module[{out, i, var, fstrings, fstring, vars,left
 
 	out = string;
 
-	Do[Module[{type,flags,width,prec},
-	fstring = fstrings[[i]]; var = vars[[i]];
+	Do[Module[{type,flags,width,prec,sign},
+	fstring = fstrings[[i]]; var = N[vars[[i]]];
 	
+	sign = Sign[var];
 	type = StringTake[fstring,-1];
 	flags = StringDrop[DropBrackets[StringCases[fstring,RegularExpression["^%[-+ #0]{0,5}"]],"%"], 1];
 	width = DropBrackets[StringCases[fstring,RegularExpression["[0-9]+"]], 0]//ToExpression;
@@ -51,19 +48,43 @@ sprintf[string_,arguments___]:=Module[{out, i, var, fstrings, fstring, vars,left
 
 	Switch[type,
 		"d", (* integer format  --- needs rewriting (see % f for template) *)
-			Module[{options = {ExponentFunction->(Null&)}},
-			(* if 0 is part of the flags, pad with zeros, if not, pad with spaces *)
-			If[StringFreeQ[flags,"0"], 
-				AppendTo[options, NumberPadding->{" ","0"}], 
-				AppendTo[options,NumberPadding->{"0","0"}]
+			Module[{signpart,intpart, pad},
+			intpart = IntegerDigits[IntegerPart[var]];
+			intpart = StringJoin@@ToString/@intpart;
+
+			(* pad with zeros according to precision *)
+			While[StringLength[intpart]<prec, intpart = StringInsert[intpart, "0", 1]];
+
+			(* a precision of 0 means zero will not be displayed*)
+			If[ prec==0 && intpart=="0", intpart = ""];
+			
+			(* add sign, according to flag *)
+			signpart = If[!StringFreeQ[flags," "]," ", ""];
+			If[sign<0, 
+				signpart = "-",
+			(* else *)
+				If[!StringFreeQ[flags,"+"], signpart = "+"]
 			];
-			(* all other flags unimplemented *)
-			out = StringReplace[out, fstring->ToString[NumberForm[IntegerPart[var],Max[width,prec],options]],1]
+
+			(* pad to the left, right, or none, according to width - # characters *)
+			pad = If[!StringFreeQ[flags,"0"],"0", " "];
+			While[Plus@@(StringLength/@{signpart,intpart}) < width,
+				If[!StringFreeQ[flags,"-"], 
+					intpart = StringInsert[intpart, " ", -1],
+				(* else *)
+					If[pad==" ", 
+						signpart = StringInsert[signpart," ",1],
+					(*else*)
+						intpart = StringInsert[intpart,"0",1]
+					];
+				];
+			];
+
+			out = StringReplace[out, fstring->signpart<>intpart,1]
 		],
 		"f", (* float format *)
 		Module[{digits, offset, sign, decimals, intpart, signpart, pad},
 			{digits, offset} = RealDigits[var];
-			sign = Sign[var];
 			digits = StringJoin@@ToString/@digits;
 			
 			(* delete all the zeros at the end *)
@@ -90,8 +111,7 @@ sprintf[string_,arguments___]:=Module[{out, i, var, fstrings, fstring, vars,left
 				signpart = "-",
 			(* else *)
 				If[!StringFreeQ[flags,"+"], signpart = "+"]
-			];
-				
+			];			
 			
 			(* pad to the left, right, or none, according to width - # characters *)
 			pad = If[!StringFreeQ[flags,"0"],"0", " "];
