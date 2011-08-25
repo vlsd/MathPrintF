@@ -4,10 +4,14 @@
 (* author: Vlad Seghete, vlad.seghete@gmail.com *)
 (* modified: Aug 24, 2011 *)
 (* bugs:
-	1. an unnnecessarHy space is introduced in front of the number -- FIXED
+	1. an unnnecessary space is introduced in front of the number -- FIXED
 	2. %.x and % x. syntax fails -- FIXED
 	3. how should %0.x or % x .0 be interpreted? make it more consistent with the C specs
 	4. % d doesn't work properly. it needs defaults. -- FIXED
+	5. When using % f on negative numbers, strange things happen.  
+		With % f the negative signs don't show up, and with a left padded form 
+		such as %3 .6f the negative takes up part of the padding.  For example %3 .4f with -1.2345 
+		prints as 0-1.2345
 
 TODO:
 	add '+' functionality to % d and % f
