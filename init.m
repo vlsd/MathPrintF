@@ -17,17 +17,17 @@ TODO:
 	implement % c (?) 
 *)
 
+
 BeginPackage["MathPrintF`"];
 
 sprintf::usage = "just like in C";
 fprintf::usage = "just like in C";
  printf::usage = "just like in C";
+DropBrackets::usage = "DropBrackets[x, ifempty:\"\"]";
 
 Begin["`Private`"];
 
-DropBrackets[x_, ifempty_:""]:=If[x!={},First[Flatten[x]], ifempty];
-
-
+DropBrackets[x_, ifempty_:""]:=If[x!={} ,First[Flatten[x]], ifempty];
 sprintf[string_,arguments___]:=Module[{out, i, var, fstrings, fstring, vars,left, right=4, rightint, leftint, opts},
 	vars = List[arguments];
 	
@@ -35,42 +35,83 @@ sprintf[string_,arguments___]:=Module[{out, i, var, fstrings, fstring, vars,left
 	If[Length[vars]!=Length[fstrings], Throw["wrong number of values in fprintf"]];
 
 	out = string;
-	Do[
+
+	Do[Module[{type,flags,width,prec},
 	fstring = fstrings[[i]]; var = vars[[i]];
-	Switch[fstring,
-		x_/;StringMatchQ[x,__~~"d"], (* integer format *)
-			Module[{flags,width,prec,options = {ExponentFunction->(Null&)}},
-			flags = DropBrackets[StringDrop[StringCases[fstring,RegularExpression["^%[-+ #0]{0,5}"]],1], ""];
-			width = DropBrackets[StringCases[fstring,RegularExpression["[0-9]+"]], 0]//ToExpression;
-			prec = 0; (*StringDrop[StringCases[fstring,RegularExpression["\\.[0-9]+"]],1]//Scalarize//;*)
-(*			Print[{flags,width,prec}]*)
-			If[StringFreeQ[flags,"0"], AppendTo[options, NumberPadding->{" ","0"}], AppendTo[options,NumberPadding->{"0","0"}]];
+	
+	type = StringTake[fstring,-1];
+	flags = StringDrop[DropBrackets[StringCases[fstring,RegularExpression["^%[-+ #0]{0,5}"]],"%"], 1];
+	width = DropBrackets[StringCases[fstring,RegularExpression["[0-9]+"]], 0]//ToExpression;
+	(* if no '.' is specified, precision defaults to 1 *)
+	If[StringFreeQ[fstring,"."], 
+			prec = 1,
+		(* else *)
+			prec = StringDrop[DropBrackets[StringCases[fstring,RegularExpression["\\.[0-9]+"]],".0"],1]//ToExpression;
+	];
+
+	Switch[type,
+		"d", (* integer format  --- needs rewriting (see % f for template) *)
+			Module[{options = {ExponentFunction->(Null&)}},
+			(* if 0 is part of the flags, pad with zeros, if not, pad with spaces *)
+			If[StringFreeQ[flags,"0"], 
+				AppendTo[options, NumberPadding->{" ","0"}], 
+				AppendTo[options,NumberPadding->{"0","0"}]
+			];
 			(* all other flags unimplemented *)
-			out = StringReplace[out, fstring->StringDrop[ToString[PaddedForm[IntegerPart[var],Max[width,prec],options]],1],1]
+			out = StringReplace[out, fstring->ToString[NumberForm[IntegerPart[var],Max[width,prec],options]],1]
 		],
-		x_/;StringMatchQ[x,__~~"f"], (* float format *)
-			If[StringFreeQ[fstring,"."], 
-				right = 5; 
-				left = StringReplace[fstring,_~~s___~~_:>s];
-				If[left == "",
-					(* no option is given *)
-					out = StringReplace[out, fstring->StringDrop[ToString[PaddedForm[N[var],{right,right},ExponentFunction->(Null&),NumberPadding->{"0","0"}]],1],1],
+		"f", (* float format *)
+		Module[{digits, offset, sign, decimals, intpart, signpart, pad},
+			{digits, offset} = RealDigits[var];
+			sign = Sign[var];
+			digits = StringJoin@@ToString/@digits;
+			
+			(* delete all the zeros at the end *)
+			digits = StringTrim[digits, RegularExpression["0*$"]];
+
+			(* pad with 0s if needed *)
+			While[offset < 1, 
+				digits = StringInsert[digits, "0", 1];
+				offset = offset + 1
+			];
+
+			(* add the decimal point where it belongs *)
+			digits = StringInsert[digits, ".", offset+1];
+
+			(* delete figures to the right of the decimal according to prec *)
+			decimals = DropBrackets[StringCases[digits,RegularExpression["\\.[0-9]*$"]]];
+			While[ StringLength[decimals]>prec+1, decimals = StringDrop[decimals, -1]];
+			While[ StringLength[decimals]<prec+1, decimals = StringInsert[decimals,"0",-1]];
+			
+			(* add sign, according to flag *)
+			intpart = StringDrop[DropBrackets[StringCases[digits,RegularExpression["^[0-9]*\\."]]],-1];
+			signpart = If[!StringFreeQ[flags," "]," ", ""];
+			If[sign<0, 
+				signpart = "-",
+			(* else *)
+				If[!StringFreeQ[flags,"+"], signpart = "+"]
+			];
+				
+			
+			(* pad to the left, right, or none, according to width - # characters *)
+			pad = If[!StringFreeQ[flags,"0"],"0", " "];
+			While[Plus@@(StringLength/@{signpart,intpart,decimals}) < width,
+				If[!StringFreeQ[flags,"-"], 
+					decimals = StringInsert[decimals, pad, -1],
 				(* else *)
-					(* only a number is given *)
-					left = ToExpression[left];
-					out = StringReplace[out, fstring->StringDrop[ToString[PaddedForm[N[var],{left+right,right},ExponentFunction->(Null&),NumberPadding->{"0","0"}]],1],1]
-				],
-				(* else, we have a dot *)
-				opts = StringSplit[StringReplace[fstring,_~~s___~~_:>s],"."];
-				If[Length[opts] == 2, {left,right}=opts, 
-					If[StringTake[fstring,{-2}]==".", (* % x. syntax *) {left,right} = {opts,"0"}//Flatten, {left,right}={"0",opts}//Flatten]
+					If[pad==" ", 
+						signpart = StringInsert[signpart," ",1],
+					(*else*)
+						intpart = StringInsert[intpart,"0",1]
+					];
 				];
-				{left,right} = ToExpression/@{left,right};
-				out = StringReplace[out, fstring->StringDrop[ToString[PaddedForm[N[var],{left+right, right},ExponentFunction->(Null&),NumberPadding->{"0","0"}]],1],1]
-			],
+			];
+
+			out = StringReplace[out, fstring->signpart<>intpart<>decimals,1]
+		],
 		
 		_, Throw["only %f and %d coded for now"]
-	],
+	]],
 	{i,Length[vars]}];
 	
 out
