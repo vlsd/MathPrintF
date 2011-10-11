@@ -35,7 +35,7 @@ DropBrackets[x_, ifempty_:""]:=If[x!={} ,First[Flatten[x]], ifempty];
 sprintf[string_,arguments___]:=Module[{out, i, var, fstrings, fstring, vars,left, right=4, rightint, leftint, opts},
 	vars = List[arguments];
 	
-	fstrings = StringCases[string,"%"~~Shortest[___]~~{"f","d","X","x","e","E","^"}];
+	fstrings = StringCases[string,"%"~~Shortest[___]~~{"s","f","d","X","x","e","E","^"}];
 	If[Length[vars]!=Length[fstrings], Throw["wrong number of values in fprintf"]];
 
 	out = string;
@@ -55,7 +55,16 @@ sprintf[string_,arguments___]:=Module[{out, i, var, fstrings, fstring, vars,left
 	];
 
 	Switch[type,
-		"d", (* integer format  --- needs rewriting (see % f for template) *)
+		"s", (* string format *)
+			Module[{str},
+			If[StringFreeQ[fstring, "."],
+				str = var,
+			(* else *)
+				str = StringTake[var, prec];
+			];
+			out = StringReplace[out, fstring->str, 1]
+		],
+		"d", (* integer format *)
 			Module[{signpart,intpart, pad},
 			intpart = IntegerDigits[IntegerPart[var]];
 			intpart = StringJoin@@ToString/@intpart;
