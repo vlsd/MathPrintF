@@ -1,7 +1,8 @@
-To install as an add-on copy the MathPrintF directory to ~/Library/Applications.
-To use it, simply do <<MathPrintF` before calling the printf[] functions.
+To install as an add-on copy the MathPrintF directory to 
+~/Library/Mathematica/Applications/. To use it, run <<MathPrintF` before calling
+the printf[] functions.
 
-Alternatively add to ~/Library/Autoload/
+Alternatively add to ~/Library/Mathematica/Autoload/
 The package will be autoloaded and you can use printf[] functions without any
 additional code.
 
