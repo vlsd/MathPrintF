@@ -91,14 +91,14 @@ sprintf[string_,arguments___]:=Module[{out, i, var, fstrings, fstring, vars,left
 		Module[{digits, offset, decimals, intpart, signpart, pad},
 			{digits, offset} = RealDigits[var];
 			digits = StringJoin@@ToString/@digits;
-			
+
 			(* delete all the zeros at the end *)
 			digits = StringTrim[digits, RegularExpression["0*$"]];
 
 			(* pad with 0s if needed *)
-			While[offset < 1, 
+			While[offset > 1, 
 				digits = StringInsert[digits, "0", 1];
-				offset = offset + 1
+				offset = offset - 1
 			];
 
 			(* add the decimal point where it belongs *)
