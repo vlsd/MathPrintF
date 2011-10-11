@@ -19,6 +19,9 @@
 *)
 
 
+printf["%8.2f",3000]
+
+
 BeginPackage["MathPrintF`"];
 
 sprintf::usage = "just like in C";
@@ -96,9 +99,12 @@ sprintf[string_,arguments___]:=Module[{out, i, var, fstrings, fstring, vars,left
 			digits = StringTrim[digits, RegularExpression["0*$"]];
 
 			(* pad with 0s if needed *)
-			While[offset > 1, 
+			While[offset < 1, 
 				digits = StringInsert[digits, "0", 1];
-				offset = offset - 1
+				offset = offset + 1;
+			];
+			While[StringLength[digits]<offset,
+				digits = StringInsert[digits, "0", -1];
 			];
 
 			(* add the decimal point where it belongs *)
