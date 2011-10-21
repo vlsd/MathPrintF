@@ -19,7 +19,7 @@
 *)
 
 
-printf["%8.2f",3000]
+(*printf["%8.2f",3000]*)
 
 
 BeginPackage["MathPrintF`"];
