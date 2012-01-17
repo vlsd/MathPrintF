@@ -20,3 +20,7 @@ install.  To install I soft linked the directory using the following command:
     sudo ln -s "PATH_TO_DIRECTORY_CONTAINING_init.m" /usr/local/Wolfram/Mathematica/8.0/AddOns/Packages/MathPrintF
     
 Also noticed that the directory name and the package name in init.m must match.
+
+-----------------
+On another Linux install it seems like the place to put it in is ~/.Mathematica/Autoload/
+I haven't yet tested it though.
