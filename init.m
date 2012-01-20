@@ -149,8 +149,101 @@ sprintf[string_,arguments___]:=Module[{out, i, var, fstrings, fstring, vars,left
 
 			out = StringReplace[out, fstring->signpart<>intpart<>decimals,1]
 		],
-		
-		_, Throw["only %f and %d coded for now"]
+		"e", (*exponential form*)
+		Module[{digits, offset, decimals, intpart, signpart, pad, exponent},
+			{digits, offset} = RealDigits[var];
+			digits = StringJoin@@ToString/@digits;
+
+			(* delete all the zeros at the end *)
+			digits = StringTrim[digits, RegularExpression["0*$"]];
+
+			While[StringLength[digits]<offset,
+				digits = StringInsert[digits, "0", -1];
+			];
+
+			(* add the decimal point where it belongs *)
+			digits = StringInsert[digits, ".", 2];
+			exponent = IntegerDigits[offset-1, 10, 3];
+			exponent = "e"<>If[offset<0,"-","+"]<>StringJoin@@ToString/@exponent;
+
+			(* delete figures to the right of the decimal according to prec *)
+			decimals = DropBrackets[StringCases[digits,RegularExpression["\\.[0-9]*$"]]];
+			While[ StringLength[decimals]>prec+1, decimals = StringDrop[decimals, -1]];
+			While[ StringLength[decimals]<prec+1, decimals = StringInsert[decimals,"0",-1]];
+			
+			(* add sign, according to flag *)
+			intpart = StringDrop[DropBrackets[StringCases[digits,RegularExpression["^[0-9]*\\."]]],-1];
+			signpart = If[!StringFreeQ[flags," "]," ", ""];
+			If[sign<0, 
+				signpart = "-",
+			(* else *)
+				If[!StringFreeQ[flags,"+"], signpart = "+"]
+			];			
+
+			(* pad to the left, right, or none, according to width - # characters *)
+			pad = If[!StringFreeQ[flags,"0"],"0", " "];
+			While[Plus@@(StringLength/@{signpart,intpart,decimals,exponent}) < width,
+				If[!StringFreeQ[flags,"-"], 
+					exponent = StringInsert[exponent, pad, -1],
+				(* else *)
+					If[pad==" ", 
+						signpart = StringInsert[signpart," ",1],
+					(*else*)
+						intpart = StringInsert[intpart,"0",1]
+					];
+				];
+			];
+
+			out = StringReplace[out, fstring->signpart<>intpart<>decimals<>exponent,1]
+		],
+		"E", (*uppercase exponential form*)
+		Module[{digits, offset, decimals, intpart, signpart, pad, exponent},
+			{digits, offset} = RealDigits[var];
+			digits = StringJoin@@ToString/@digits;
+
+			(* delete all the zeros at the end *)
+			digits = StringTrim[digits, RegularExpression["0*$"]];
+
+			While[StringLength[digits]<offset,
+				digits = StringInsert[digits, "0", -1];
+			];
+
+			(* add the decimal point where it belongs *)
+			digits = StringInsert[digits, ".", 2];
+			exponent = IntegerDigits[offset-1, 10, 3];
+			exponent = "E"<>If[offset<0,"-","+"]<>StringJoin@@ToString/@exponent;
+
+			(* delete figures to the right of the decimal according to prec *)
+			decimals = DropBrackets[StringCases[digits,RegularExpression["\\.[0-9]*$"]]];
+			While[ StringLength[decimals]>prec+1, decimals = StringDrop[decimals, -1]];
+			While[ StringLength[decimals]<prec+1, decimals = StringInsert[decimals,"0",-1]];
+			
+			(* add sign, according to flag *)
+			intpart = StringDrop[DropBrackets[StringCases[digits,RegularExpression["^[0-9]*\\."]]],-1];
+			signpart = If[!StringFreeQ[flags," "]," ", ""];
+			If[sign<0, 
+				signpart = "-",
+			(* else *)
+				If[!StringFreeQ[flags,"+"], signpart = "+"]
+			];			
+
+			(* pad to the left, right, or none, according to width - # characters *)
+			pad = If[!StringFreeQ[flags,"0"],"0", " "];
+			While[Plus@@(StringLength/@{signpart,intpart,decimals,exponent}) < width,
+				If[!StringFreeQ[flags,"-"], 
+					exponent = StringInsert[exponent, pad, -1],
+				(* else *)
+					If[pad==" ", 
+						signpart = StringInsert[signpart," ",1],
+					(*else*)
+						intpart = StringInsert[intpart,"0",1]
+					];
+				];
+			];
+
+			out = StringReplace[out, fstring->signpart<>intpart<>decimals<>exponent,1]
+		],
+		_, Throw["only %f, %e and %d coded for now"]
 	]],
 	{i,Length[vars]}];
 	
