@@ -101,7 +101,7 @@ sprintf[string_,arguments___]:=Module[{out, i, var, fstrings, fstring, vars,left
 		],
 		"f", (* float format *)
 		Module[{digits, offset, decimals, intpart, signpart, pad},
-			{digits, offset} = RealDigits[var];
+			{digits, offset} = RealDigits[Round[var,10^(-prec)]];
 			digits = StringJoin@@ToString/@digits;
 
 			(* delete all the zeros at the end *)
@@ -152,6 +152,7 @@ sprintf[string_,arguments___]:=Module[{out, i, var, fstrings, fstring, vars,left
 		"e", (*exponential form*)
 		Module[{digits, offset, decimals, intpart, signpart, pad, exponent},
 			{digits, offset} = RealDigits[var];
+			{digits, offset} = RealDigits[Round[var,10^(-prec+offset-1)]];
 			digits = StringJoin@@ToString/@digits;
 
 			(* delete all the zeros at the end *)
@@ -164,7 +165,7 @@ sprintf[string_,arguments___]:=Module[{out, i, var, fstrings, fstring, vars,left
 			(* add the decimal point where it belongs *)
 			digits = StringInsert[digits, ".", 2];
 			exponent = IntegerDigits[offset-1, 10, 3];
-			exponent = "e"<>If[offset<0,"-","+"]<>StringJoin@@ToString/@exponent;
+			exponent = "e"<>If[offset<1,"-","+"]<>StringJoin@@ToString/@exponent;
 
 			(* delete figures to the right of the decimal according to prec *)
 			decimals = DropBrackets[StringCases[digits,RegularExpression["\\.[0-9]*$"]]];
@@ -199,6 +200,7 @@ sprintf[string_,arguments___]:=Module[{out, i, var, fstrings, fstring, vars,left
 		"E", (*uppercase exponential form*)
 		Module[{digits, offset, decimals, intpart, signpart, pad, exponent},
 			{digits, offset} = RealDigits[var];
+			{digits, offset} = RealDigits[Round[var,10^(-prec+offset-1)]];
 			digits = StringJoin@@ToString/@digits;
 
 			(* delete all the zeros at the end *)
