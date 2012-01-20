@@ -41,7 +41,7 @@ sprintf[string_,arguments___]:=Module[{out, i, var, fstrings, fstring, vars,left
 	out = string;
 
 	Do[Module[{type,flags,width,prec,sign},
-	fstring = fstrings[[i]]; var = N[vars[[i]]];
+	fstring = fstrings[[i]]; var = N[vars[[i]],Min[Precision[vars[[i]]],1000]];
 	
 	sign = Sign[var];
 	type = StringTake[fstring,-1];
