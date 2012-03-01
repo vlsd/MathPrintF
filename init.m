@@ -62,7 +62,7 @@ sprintf[string_,arguments___]:=Module[{out, i, var, fstrings, fstring, vars,left
 			(* else *)
 				str = StringTake[var, prec];
 			];
-			out = StringReplace[out, fstring->str, 1]
+			out = StringReplace[out, fstring->ToString[str], 1]
 		],
 		"d", (* integer format *)
 			Module[{signpart,intpart, pad},
