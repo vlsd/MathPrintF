@@ -17,8 +17,7 @@
 
 Limited Functionality
 ------------------------
-While I am working on adding functionality to mimic the C-standard as much
-as possible, only certain features are implemented. These are mainly dictated
-by what I need the most. In particular %d, %f, and %s with most of their options
-are implemented. If a particular feature is missing please let me know at
-vloodo@yahoo.co.uk and I will do my best to implement it as quickly as possible.
+While we tried to mimic the C-standard as much as possible, only certain
+features are implemented. These are mainly dictated by what we needed at
+the time. In particular %d, %f, %e, %E and %s with most of their options
+are implemented. 
