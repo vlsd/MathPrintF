@@ -58,11 +58,11 @@ sprintf[string_,arguments___]:=Module[{out, i, var, fstrings, fstring, vars,left
 		"s", (* string format *)
 			Module[{str},
 			If[StringFreeQ[fstring, "."],
-				str = var,
+				str = ToString[var],
 			(* else *)
-				str = StringTake[var, prec];
+				str = StringTake[ToString[var], prec];
 			];
-			out = StringReplace[out, fstring->ToString[str], 1]
+			out = StringReplace[out, fstring->str, 1]
 		],
 		"d", (* integer format *)
 			Module[{signpart,intpart, pad},
