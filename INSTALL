@@ -1,26 +1,19 @@
-To install as an add-on copy the MathPrintF directory to 
-~/Library/Mathematica/Applications/. To use it, run <<MathPrintF` before calling
-the printf[] functions.
+Copy init.m to 
 
-Alternatively add to ~/Library/Mathematica/Autoload/
-The package will be autoloaded and you can use printf[] functions without any
-additional code.
+$MATHPATH/Applications/MathPrintF/
 
-The above only works on OS-X. You'll have to figure out where the relevant
-directories are on your system. A good place to start is to look at the $Path
-variable in Mathematica.
+and load it by running
 
+<<MathPrintF`
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-EDIT
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-I did not have a ~/Library/Autoload or ~/Library/Applications on my Linux 
-install.  To install I soft linked the directory using the following command:
+To autoload it on the start of the kernel, copy init.m to
 
-    sudo ln -s "PATH_TO_DIRECTORY_CONTAINING_init.m" /usr/local/Wolfram/Mathematica/8.0/AddOns/Packages/MathPrintF
-    
-Also noticed that the directory name and the package name in init.m must match.
+$MATHPATH/Autoload/MathPrintF
 
------------------
-On another Linux install it seems like the place to put it in is ~/.Mathematica/Autoload/
-I haven't yet tested it though.
+The actual location of $MATHPATH will depend on your system. You can determine it
+by looking at the $Path variable inside Mathematica. Here are some paths for common
+operating systems:
+
+OS-X:                ~/Library/Mathematica/
+Linux (Debian):      ~/.Mathematica/
+Windows:             I have no idea, anyone want to help me out?
