@@ -16,4 +16,4 @@ operating systems:
 
 OS-X:                ~/Library/Mathematica/
 Linux (Debian):      ~/.Mathematica/
-Windows:             I have no idea, anyone want to help me out?
+Windows:             %APPDATA%\Mathematica\
